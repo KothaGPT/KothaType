@@ -13,11 +13,11 @@ describe('Content Script', () => {
       ...document,
       querySelectorAll: vi.fn().mockReturnValue([]),
       addEventListener: vi.fn()
-    } as any;
+    } as unknown as Document;
     global.window = {
       ...window,
       addEventListener: vi.fn()
-    } as any;
+    } as unknown as Window & typeof globalThis;
   });
 
   it('should be a valid module', () => {

@@ -1,4 +1,4 @@
-(function () {
+var KothaTypeContentScript = (function (exports) {
     'use strict';
 
     // Simplified core transliteration logic — partial Avro-like
@@ -33,4 +33,8 @@
         });
     });
 
-})();
+    exports.attachPhoneticInput = attachPhoneticInput;
+
+    return exports;
+
+})({});
