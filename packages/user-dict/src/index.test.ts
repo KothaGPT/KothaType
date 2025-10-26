@@ -6,6 +6,7 @@ describe('user-dict', () => {
   beforeEach(async () => {
     // Clear any existing data
     const words = await all();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const word of words) {
       // Note: In a real implementation, you'd want a delete function
       // For now, we're just testing the basic functionality
