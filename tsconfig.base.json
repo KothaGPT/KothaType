@@ -2,11 +2,15 @@
   "compilerOptions": {
     "target": "ES2021",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "types": ["vitest/globals"]
   }
 }

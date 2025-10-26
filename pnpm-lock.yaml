@@ -104,10 +104,10 @@ importers:
         specifier: ^14.5.1
         version: 14.6.1(@testing-library/dom@9.3.4)
       '@types/react':
-        specifier: ^18.2.0
+        specifier: ^18.3.26
         version: 18.3.26
       '@types/react-dom':
-        specifier: ^18.2.0
+        specifier: ^18.3.7
         version: 18.3.7(@types/react@18.3.26)
       '@vitejs/plugin-react':
         specifier: ^4.0.0
@@ -168,6 +168,9 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
     devDependencies:
+      '@types/fast-levenshtein':
+        specifier: ^0.0.4
+        version: 0.0.4
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -933,6 +936,9 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  '@types/fast-levenshtein@0.0.4':
+    resolution: {integrity: sha512-tkDveuitddQCxut1Db8eEFfMahTjOumTJGPHmT9E7KUH+DkVq9WTpVvlfenf3S+uCBeu8j5FP2xik/KfxOEjeA==}
 
   '@types/filesystem@0.0.36':
     resolution: {integrity: sha512-vPDXOZuannb9FZdxgHnqSwAG/jvdGM8Wq+6N4D/d80z+D4HWH+bItqsZaVRQykAn6WEVeEkLm2oQigyHtgb0RA==}
@@ -3488,6 +3494,8 @@ snapshots:
       '@types/har-format': 1.2.16
 
   '@types/estree@1.0.8': {}
+
+  '@types/fast-levenshtein@0.0.4': {}
 
   '@types/filesystem@0.0.36':
     dependencies:
