@@ -18,6 +18,11 @@ describe('fuzzy.suggest', () => {
     expect(result).toEqual([]);
   });
 
+  it('handles whitespace only input', () => {
+    const result = suggest('   ');
+    expect(result).toEqual([]);
+  });
+
   it('limits results to 5 suggestions', () => {
     const result = suggest('a');
     expect(result.length).toBeLessThanOrEqual(5);
@@ -26,6 +31,16 @@ describe('fuzzy.suggest', () => {
   it('returns suggestions in order of similarity', () => {
     const result = suggest('tom');
     expect(result[0]).toBe('tomar');
+  });
+
+  it('filters out words with high edit distance', () => {
+    const result = suggest('xyz');
+    expect(result).toEqual([]);
+  });
+
+  it('finds close matches', () => {
+    const result = suggest('bang');
+    expect(result).toContain('bangla');
   });
 });
 
@@ -55,5 +70,10 @@ describe('fuzzy.useFuzzyMatch', () => {
   it('replaces each word independently', () => {
     const result = useFuzzyMatch('am gan');
     expect(result).toBe('ami gan');
+  });
+
+  it('handles words with no close matches', () => {
+    const result = useFuzzyMatch('xyz');
+    expect(result).toBe('xyz');
   });
 });
