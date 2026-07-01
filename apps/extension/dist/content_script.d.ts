@@ -1,1 +1,1 @@
-export declare function attachPhoneticInput(input: HTMLInputElement): void;
+export declare function attachPhoneticInput(input: HTMLInputElement | HTMLTextAreaElement): void;

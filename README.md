@@ -13,24 +13,25 @@ A full-featured TypeScript monorepo for phonetic Bangla transliteration with CLI
 - **Browser Extension** (`apps/extension`) - Chrome extension (Manifest V3)
 - **Web Application** (`apps/web`) - React app for dictionary management
 
-## Installation
+## Quick Start
+
+### Prerequisites
+
+- Node.js 20+ (see `.nvmrc`)
+- pnpm 9+
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/kothatype.git
+cd kothatype
+
 # Install dependencies
 pnpm install
 
 # Build all packages
 pnpm build
-
-# Run web app in development mode
-pnpm --filter kothatype-web dev
-
-# Build extension
-pnpm --filter kothatype-extension build
-
-# Install CLI globally
-pnpm --filter @kothatype/cli build
-pnpm link ./packages/cli
 ```
 
 ## Usage
@@ -54,18 +55,26 @@ kothatype interactive
 ### Web App
 
 ```bash
-cd apps/web
-pnpm dev
+# Start development server
+pnpm --filter kothatype-web dev
+
 # Visit http://localhost:5173
 ```
 
 ### Browser Extension
 
-1. Build the extension: `pnpm --filter kothatype-extension build`
-2. Load `apps/extension/dist` as an unpacked extension in Chrome
-3. Type in any text field to see phonetic transliteration
+1. Build the extension:
+   ```bash
+   pnpm --filter kothatype-extension build
+   ```
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select `apps/extension/dist`
+5. Type in any text field to see phonetic transliteration
 
 ## Development
+
+### Available Scripts
 
 ```bash
 # Install dependencies
@@ -74,38 +83,160 @@ pnpm install
 # Build all packages
 pnpm build
 
+# Run all tests
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+
 # Run linting
 pnpm lint
 
+# Run type checking
+pnpm typecheck
+
 # Watch mode for development
-pnpm --filter @kothatype/core build --watch
+pnpm test:watch
 ```
 
-## Architecture
+### Project Structure
 
 ```
 kothatype/
 ├── packages/
 │   ├── core/              # Transliteration engine
+│   │   ├── src/
+│   │   │   ├── index.ts       # Main transliterate function
+│   │   │   └── index.test.ts  # Tests
+│   │   └── package.json
 │   ├── fuzzy/             # Fuzzy phonetic correction
+│   │   ├── src/
+│   │   │   ├── index.ts       # Suggest and useFuzzyMatch functions
+│   │   │   └── index.test.ts  # Tests
+│   │   └── package.json
 │   ├── user-dict/         # IndexedDB user dictionary
+│   │   ├── src/
+│   │   │   ├── index.ts       # saveWord and all functions
+│   │   │   └── index.test.ts  # Tests
+│   │   └── package.json
 │   └── cli/               # Command line interface
+│       ├── src/
+│       │   ├── cli.ts         # CLI commands and handlers
+│       │   ├── cli.test.ts    # Tests
+│       │   └── index.ts       # Exports
+│       └── package.json
 ├── apps/
 │   ├── extension/         # Browser extension (Manifest V3)
+│   │   ├── src/
+│   │   │   ├── content_script.ts       # Content script
+│   │   │   └── content_script.test.ts  # Tests
+│   │   └── package.json
 │   └── web/               # React web app
-├── pnpm-workspace.yaml
-├── tsconfig.base.json
-└── package.json
+│       ├── src/
+│       │   ├── App.tsx            # Main component
+│       │   ├── App.test.tsx       # Tests
+│       │   └── main.tsx           # Entry point
+│       └── package.json
+├── .github/
+│   └── workflows/
+│       ├── test.yml       # CI test workflow
+│       └── publish.yml    # Publish workflow
+├── package.json           # Root package.json
+├── pnpm-workspace.yaml    # pnpm workspace config
+├── tsconfig.base.json     # Base TypeScript config
+├── vitest.config.ts       # Vitest config
+├── .eslintrc.cjs          # ESLint config
+├── .prettierrc            # Prettier config
+├── .editorconfig          # Editor config
+├── .gitignore             # Git ignore
+├── .nvmrc                 # Node version
+├── CONTRIBUTING.md        # Contributing guide
+└── README.md              # This file
 ```
+
+## Architecture
+
+### Core Transliteration
+
+The transliteration engine uses regex-based rules to convert Roman text to Bangla:
+
+```typescript
+import { transliterate } from '@kothatype/core';
+
+const result = transliterate('ami bangla');
+// Output: 'আমি বাংলা'
+```
+
+### Fuzzy Matching
+
+The fuzzy matching module provides suggestions based on Levenshtein distance:
+
+```typescript
+import { suggest, useFuzzyMatch } from '@kothatype/fuzzy';
+
+const suggestions = suggest('am');
+// Output: ['ami', 'bangla', ...]
+
+const result = useFuzzyMatch('ami');
+// Output: 'আমি' (if close match found)
+```
+
+### User Dictionary
+
+The user dictionary module provides persistent storage using IndexedDB:
+
+```typescript
+import { saveWord, all } from '@kothatype/user-dict';
+
+await saveWord('hello', 'হ্যালো');
+const words = await all();
+// Output: [{ roman: 'hello', bangla: 'হ্যালো' }]
+```
+
+## Testing
+
+We use [Vitest](https://vitest.dev/) for testing with the following commands:
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+### Coverage Report
+
+Current test coverage:
+
+| Package | Statements | Branches | Functions | Lines |
+|---------|-----------|----------|-----------|-------|
+| @kothatype/core | 100% | 100% | 100% | 100% |
+| @kothatype/user-dict | 100% | 100% | 100% | 100% |
+| @kothatype/fuzzy | 100% | 91.66% | 100% | 100% |
+| @kothatype/cli | 83.95% | 90% | 60% | 83.95% |
+| kothatype-extension | 100% | 100% | 100% | 100% |
+| kothatype-web | 83.63% | 85.71% | 75% | 83.63% |
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
 
-MIT
+MIT License. See [LICENSE](LICENSE) for details.
+
+## Support
+
+- [GitHub Issues](https://github.com/your-username/kothatype/issues)
+- [Documentation](./README.md)
+
+## Acknowledgments
+
+- Built with TypeScript, React, and Vite
+- Uses [Commander.js](https://github.com/tj/commander.js/) for CLI
+- Uses [fast-levenshtein](https://github.com/hiddysmart/fast-levenshtein) for fuzzy matching
+- Uses [idb](https://github.com/nicolo-ribaudo/idb) for IndexedDB

@@ -3,36 +3,21 @@ import { Command } from "commander";
 import { transliterate } from "@kothatype/core";
 import { suggest, useFuzzyMatch } from "@kothatype/fuzzy";
 import * as readline from "readline";
-const program = new Command();
-program
-    .name("kothatype")
-    .description("English to Bangla phonetic transliteration CLI")
-    .version("1.0.0");
-program
-    .command("transliterate <text>")
-    .description("Transliterate English text to Bangla")
-    .option("-f, --fuzzy", "Enable fuzzy matching")
-    .action((text, options) => {
+export function handleTransliterate(text, options) {
     let result = transliterate(text);
     if (options.fuzzy) {
         result = useFuzzyMatch(result);
     }
     console.log(result);
-});
-program
-    .command("suggest <text>")
-    .description("Get fuzzy suggestions for text")
-    .action((text) => {
+}
+export function handleSuggest(text) {
     const suggestions = suggest(text);
     console.log("Suggestions:");
     suggestions.forEach((suggestion, index) => {
         console.log(`${index + 1}. ${suggestion}`);
     });
-});
-program
-    .command("interactive")
-    .description("Interactive transliteration mode")
-    .action(() => {
+}
+export function handleInteractive() {
     console.log("KothaType Interactive Mode");
     console.log("Type 'exit' to quit");
     console.log("");
@@ -56,5 +41,23 @@ program
         console.log("\nGoodbye!");
         process.exit(0);
     });
-});
+}
+const program = new Command();
+program
+    .name("kothatype")
+    .description("English to Bangla phonetic transliteration CLI")
+    .version("1.0.0");
+program
+    .command("transliterate <text>")
+    .description("Transliterate English text to Bangla")
+    .option("-f, --fuzzy", "Enable fuzzy matching")
+    .action(handleTransliterate);
+program
+    .command("suggest <text>")
+    .description("Get fuzzy suggestions for text")
+    .action(handleSuggest);
+program
+    .command("interactive")
+    .description("Interactive transliteration mode")
+    .action(handleInteractive);
 program.parse();
