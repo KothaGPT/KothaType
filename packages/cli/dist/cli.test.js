@@ -1,5 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-// Mock commander to avoid CLI parsing during tests
+import { handleTransliterate, handleSuggest, handleInteractive } from './cli';
+import { transliterate } from '@kothatype/core';
+import { suggest, useFuzzyMatch } from '@kothatype/fuzzy';
+vi.mock('@kothatype/core', () => ({
+    transliterate: vi.fn()
+}));
+vi.mock('@kothatype/fuzzy', () => ({
+    suggest: vi.fn(),
+    useFuzzyMatch: vi.fn()
+}));
+vi.mock('readline', () => ({
+    createInterface: vi.fn().mockReturnValue({
+        prompt: vi.fn(),
+        on: vi.fn(),
+        close: vi.fn()
+    })
+}));
 vi.mock('commander', () => ({
     Command: vi.fn().mockImplementation(() => ({
         name: vi.fn().mockReturnThis(),
@@ -11,28 +27,80 @@ vi.mock('commander', () => ({
         parse: vi.fn()
     }))
 }));
-// Mock the dependencies
-vi.mock('@kothatype/core', () => ({
-    transliterate: vi.fn((text) => `transliterated_${text}`)
-}));
-vi.mock('@kothatype/fuzzy', () => ({
-    suggest: vi.fn((text) => [`suggestion1_${text}`, `suggestion2_${text}`]),
-    useFuzzyMatch: vi.fn((text) => `fuzzy_${text}`)
-}));
-describe('CLI', () => {
+describe('CLI command handlers', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let consoleSpy;
     beforeEach(() => {
-        vi.clearAllMocks();
+        vi.mocked(transliterate).mockReset();
+        vi.mocked(suggest).mockReset();
+        vi.mocked(useFuzzyMatch).mockReset();
+        consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
     });
     afterEach(() => {
-        vi.resetAllMocks();
+        consoleSpy.mockRestore();
     });
-    it('should be defined', () => {
-        expect(true).toBe(true);
+    describe('handleTransliterate', () => {
+        it('transliterates text without fuzzy', () => {
+            vi.mocked(transliterate).mockReturnValue('আমি');
+            handleTransliterate('ami', { fuzzy: false });
+            expect(transliterate).toHaveBeenCalledWith('ami');
+            expect(consoleSpy).toHaveBeenCalledWith('আমি');
+        });
+        it('transliterates text with fuzzy option', () => {
+            vi.mocked(transliterate).mockReturnValue('ami');
+            vi.mocked(useFuzzyMatch).mockReturnValue('আমি');
+            handleTransliterate('ami', { fuzzy: true });
+            expect(transliterate).toHaveBeenCalledWith('ami');
+            expect(useFuzzyMatch).toHaveBeenCalledWith('ami');
+            expect(consoleSpy).toHaveBeenCalledWith('আমি');
+        });
+        it('handles empty text', () => {
+            vi.mocked(transliterate).mockReturnValue('');
+            handleTransliterate('', {});
+            expect(transliterate).toHaveBeenCalledWith('');
+            expect(consoleSpy).toHaveBeenCalledWith('');
+        });
+        it('handles complex sentences', () => {
+            vi.mocked(transliterate).mockReturnValue('আমি বাংলায় গান গাই');
+            handleTransliterate('ami banglay gan gai', {});
+            expect(consoleSpy).toHaveBeenCalledWith('আমি বাংলায় গান গাই');
+        });
+        it('calls useFuzzyMatch only when fuzzy is true', () => {
+            vi.mocked(transliterate).mockReturnValue('ami');
+            vi.mocked(useFuzzyMatch).mockReturnValue('আমি');
+            handleTransliterate('ami', { fuzzy: false });
+            expect(useFuzzyMatch).not.toHaveBeenCalled();
+        });
     });
-    it('should handle basic CLI structure', async () => {
-        // Import the CLI module
-        await import('./cli');
-        // The CLI should initialize without errors
-        expect(true).toBe(true);
+    describe('handleSuggest', () => {
+        it('displays numbered suggestions', () => {
+            vi.mocked(suggest).mockReturnValue(['ami', 'bangla', 'gan']);
+            handleSuggest('am');
+            expect(suggest).toHaveBeenCalledWith('am');
+            expect(consoleSpy).toHaveBeenCalledWith('Suggestions:');
+            expect(consoleSpy).toHaveBeenCalledWith('1. ami');
+            expect(consoleSpy).toHaveBeenCalledWith('2. bangla');
+            expect(consoleSpy).toHaveBeenCalledWith('3. gan');
+        });
+        it('handles empty suggestions', () => {
+            vi.mocked(suggest).mockReturnValue([]);
+            handleSuggest('xyz');
+            expect(suggest).toHaveBeenCalledWith('xyz');
+            expect(consoleSpy).toHaveBeenCalledWith('Suggestions:');
+        });
+        it('handles single suggestion', () => {
+            vi.mocked(suggest).mockReturnValue(['ami']);
+            handleSuggest('ami');
+            expect(consoleSpy).toHaveBeenCalledWith('Suggestions:');
+            expect(consoleSpy).toHaveBeenCalledWith('1. ami');
+        });
+    });
+    describe('handleInteractive', () => {
+        it('prints startup messages', () => {
+            handleInteractive();
+            expect(consoleSpy).toHaveBeenCalledWith('KothaType Interactive Mode');
+            expect(consoleSpy).toHaveBeenCalledWith("Type 'exit' to quit");
+            expect(consoleSpy).toHaveBeenCalledWith('');
+        });
     });
 });

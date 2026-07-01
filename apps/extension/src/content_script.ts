@@ -1,6 +1,6 @@
 import { transliterate } from "@kothatype/core";
 
-export function attachPhoneticInput(input: HTMLInputElement) {
+export function attachPhoneticInput(input: HTMLInputElement | HTMLTextAreaElement) {
   input.addEventListener("input", () => {
     const text = input.value;
     const converted = transliterate(text);
@@ -10,6 +10,6 @@ export function attachPhoneticInput(input: HTMLInputElement) {
 
 window.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("input[type=text], textarea").forEach(el => {
-    attachPhoneticInput(el as HTMLInputElement);
+    attachPhoneticInput(el as HTMLInputElement | HTMLTextAreaElement);
   });
 });
